@@ -1,0 +1,6 @@
+dist
+coverage
+test/fixtures
+examples/browser/vendor
+examples/browser/samples
+package-lock.json

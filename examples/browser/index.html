@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slip QR Reader</title>
+    <meta
+      name="description"
+      content="Read the QR code on a Thai bank transfer slip in your browser. The image never leaves your device."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f6f5f1;
+        --surface: #ffffff;
+        --ink: #1c1b18;
+        --muted: #6d6a62;
+        --line: #e3e0d8;
+        --accent: #0f6b5c;
+        --accent-soft: #e2f1ed;
+        --bad: #b42318;
+        --bad-soft: #fdebe9;
+        --warn: #9a5b00;
+        --warn-soft: #fdf1dc;
+        --focus: #0f6b5c;
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #141412;
+          --surface: #1d1c1a;
+          --ink: #ecebe6;
+          --muted: #a19e95;
+          --line: #33312d;
+          --accent: #5cc4ae;
+          --accent-soft: #17302a;
+          --bad: #ff8a7a;
+          --bad-soft: #3a1c18;
+          --warn: #f0b85a;
+          --warn-soft: #362a14;
+          --focus: #5cc4ae;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #141412;
+        --surface: #1d1c1a;
+        --ink: #ecebe6;
+        --muted: #a19e95;
+        --line: #33312d;
+        --accent: #5cc4ae;
+        --accent-soft: #17302a;
+        --bad: #ff8a7a;
+        --bad-soft: #3a1c18;
+        --warn: #f0b85a;
+        --warn-soft: #362a14;
+        --focus: #5cc4ae;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.6 'IBM Plex Sans Thai',
+          system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 40px 16px 64px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(26px, 5vw, 34px);
+        line-height: 1.2;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .lede {
+        margin: 0;
+        color: var(--muted);
+        max-width: 60ch;
+      }
+      .lang {
+        display: flex;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .lang button {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        padding: 6px 12px;
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .lang button[aria-pressed='true'] {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      button:focus-visible,
+      textarea:focus-visible,
+      .drop:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+      }
+      .drop {
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 6px;
+        min-height: 180px;
+        padding: 28px 16px;
+        border: 2px dashed var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .drop.over {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .drop strong {
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .drop span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 14px 0 0;
+      }
+      .btn {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        border-color: var(--muted);
+      }
+      details.paste {
+        margin-top: 14px;
+      }
+      details.paste summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 84px;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--ink);
+        font:
+          14px/1.5 'IBM Plex Mono',
+          ui-monospace,
+          monospace;
+        resize: vertical;
+      }
+      #result {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 20px;
+        align-items: start;
+      }
+      #result[hidden],
+      .preview[hidden] {
+        display: none;
+      }
+      #result:has(.preview[hidden]) {
+        grid-template-columns: 1fr;
+      }
+      @media (max-width: 680px) {
+        #result {
+          grid-template-columns: 1fr;
+        }
+        #card {
+          order: -1;
+        }
+      }
+      .preview {
+        position: relative;
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--line);
+      }
+      .preview canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+      }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .status.ok {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .status.bad {
+        background: var(--bad-soft);
+        color: var(--bad);
+      }
+      .status.warn {
+        background: var(--warn-soft);
+        color: var(--warn);
+      }
+      .message {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      dl {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        gap: 8px 16px;
+        margin: 16px 0 0;
+      }
+      dt {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .mono {
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 14px;
+      }
+      .copy {
+        margin-left: 6px;
+        padding: 0 8px;
+        font-size: 12px;
+        line-height: 22px;
+      }
+      details.json {
+        margin-top: 16px;
+      }
+      details.json summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      pre {
+        margin: 8px 0 0;
+        padding: 12px;
+        max-height: 320px;
+        overflow: auto;
+        background: var(--bg);
+        border-radius: 10px;
+        font:
+          12px/1.5 'IBM Plex Mono',
+          ui-monospace,
+          monospace;
+      }
+      .note {
+        margin-top: 36px;
+        padding: 14px 16px;
+        border-left: 3px solid var(--warn);
+        background: var(--warn-soft);
+        border-radius: 0 10px 10px 0;
+        font-size: 14px;
+      }
+      footer {
+        margin-top: 28px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      footer a {
+        color: inherit;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1 data-i18n="title">อ่าน QR บนสลิปโอนเงิน</h1>
+          <p class="lede" data-i18n="lede">
+            เช็กธนาคาร เลขอ้างอิง และ CRC จาก QR บนสลิป ประมวลผลในเบราว์เซอร์ทั้งหมด
+            รูปไม่ถูกอัปโหลดไปไหน
+          </p>
+        </div>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" data-lang="th" aria-pressed="true">ไทย</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </header>
+
+      <label class="drop" id="drop" tabindex="0">
+        <input id="file" class="sr-only" type="file" accept="image/*" />
+        <strong data-i18n="drop">ลากรูปสลิปมาวาง หรือคลิกเพื่อเลือกไฟล์</strong>
+        <span data-i18n="dropHint">วางจากคลิปบอร์ดได้ด้วย Ctrl+V / ⌘V · PNG, JPEG, WebP</span>
+      </label>
+
+      <div class="actions">
+        <button class="btn" type="button" data-sample="bank-basic.png" data-i18n="sampleSlip">
+          ลองสลิปตัวอย่าง
+        </button>
+        <button class="btn" type="button" data-sample="chat-screenshot.png" data-i18n="sampleChat">
+          แคปจากแชต
+        </button>
+        <button class="btn" type="button" data-sample="two-codes.png" data-i18n="sampleTwo">
+          มี QR 2 อัน
+        </button>
+        <button class="btn" type="button" data-sample="tampered.png" data-i18n="sampleEdited">
+          สลิปที่ถูกแก้
+        </button>
+      </div>
+
+      <details class="paste">
+        <summary data-i18n="pasteToggle">มีข้อความจาก QR อยู่แล้ว? วางตรงนี้</summary>
+        <textarea
+          id="payload"
+          spellcheck="false"
+          placeholder="0041000600000101030140220..."
+        ></textarea>
+      </details>
+
+      <section id="result" hidden aria-live="polite">
+        <div class="preview"><canvas id="canvas" aria-label="Slip preview"></canvas></div>
+        <div class="card" id="card"></div>
+      </section>
+
+      <p class="note" data-i18n="note">
+        QR ถูกต้องและ CRC ผ่าน แปลว่าข้อมูลใน QR ไม่ถูกแก้ ไม่ได้แปลว่าเงินเข้าจริง ใครก็สร้าง QR
+        หน้าตาแบบนี้ได้ ถ้าเป็นเรื่องเงิน ให้เอาเลขอ้างอิงไปเช็กกับธนาคารหรือบริการตรวจสลิป
+        และกันสลิปซ้ำด้วยทุกครั้ง
+      </p>
+
+      <footer>
+        <span data-i18n="footer">สร้างด้วย</span>
+        <a href="https://github.com/nuttakulsv/promptpay-slip-parser">promptpay-slip-parser</a> ·
+        MIT
+      </footer>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

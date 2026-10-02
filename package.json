@@ -1,0 +1,89 @@
+{
+  "name": "promptpay-slip-parser",
+  "version": "0.1.0",
+  "description": "Read Thai bank transfer slips and PromptPay QR codes: decode the slip QR from an image, check its CRC, identify the bank, and block reused slips.",
+  "keywords": [
+    "promptpay",
+    "slip",
+    "slip-verify",
+    "thai-qr",
+    "qr-code",
+    "emvco",
+    "thailand",
+    "bank",
+    "truemoney",
+    "payment"
+  ],
+  "homepage": "https://github.com/nuttakulsv/promptpay-slip-parser#readme",
+  "bugs": "https://github.com/nuttakulsv/promptpay-slip-parser/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nuttakulsv/promptpay-slip-parser.git"
+  },
+  "license": "MIT",
+  "author": "nuttakulsv",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./image": {
+      "import": {
+        "types": "./dist/image.d.ts",
+        "default": "./dist/image.js"
+      },
+      "require": {
+        "types": "./dist/image.d.cts",
+        "default": "./dist/image.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "promptpay-slip-parser": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint src test scripts examples",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "fixtures": "tsx scripts/make-fixtures.ts",
+    "demo": "npm run build && tsx scripts/build-demo.ts && npx serve examples/browser",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "zxing-wasm": "^3.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/qrcode": "^1.5.6",
+    "oxlint": "^1.86.0",
+    "prettier": "^3.9.9",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.5",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}

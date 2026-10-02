@@ -1,0 +1,17 @@
+Description:
+Read Thai bank transfer slips: decode the slip QR from an image, check the CRC, identify the bank, block reused slips. PromptPay QR builder included. Node.js and browser.
+
+Topics:
+promptpay
+thai-qr-payment
+slip-verification
+transfer-slip
+qr-code
+emvco
+thailand
+truemoney
+payment
+typescript
+webassembly
+nodejs
+line-bot

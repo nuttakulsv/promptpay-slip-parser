@@ -1,0 +1,116 @@
+[
+  {
+    "file": "bank-basic.png",
+    "note": "Plain slip, QR 220px",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "004",
+      "transRef": "016275104552BTF04123",
+      "codes": 1
+    }
+  },
+  {
+    "file": "bank-small-qr.jpg",
+    "note": "Large JPEG screenshot, QR about 96px",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "014",
+      "transRef": "202610021042AB12CD34EF56G",
+      "codes": 1
+    }
+  },
+  {
+    "file": "bank-rotated.jpg",
+    "note": "Rotated 8 degrees, JPEG q80",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "002",
+      "transRef": "0002123123121200011",
+      "codes": 1
+    }
+  },
+  {
+    "file": "chat-screenshot.png",
+    "note": "Slip forwarded inside a chat screenshot",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "006",
+      "transRef": "KTB2610021042000123",
+      "codes": 1
+    }
+  },
+  {
+    "file": "two-codes.png",
+    "note": "Payment QR at the top, slip QR at the bottom",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "025",
+      "transRef": "017999888777666ABC",
+      "codes": 2
+    }
+  },
+  {
+    "file": "truemoney.png",
+    "note": "TrueMoney Wallet slip layout, lowercase CRC",
+    "expect": {
+      "ok": true,
+      "kind": "truemoney",
+      "transactionId": "50001234567890",
+      "codes": 1
+    }
+  },
+  {
+    "file": "tampered.png",
+    "note": "transRef edited after the CRC was computed",
+    "expect": {
+      "ok": false,
+      "code": "CRC_MISMATCH",
+      "codes": 1
+    }
+  },
+  {
+    "file": "short-crc.png",
+    "note": "CRC printed without leading zeros",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "030",
+      "transRef": "TEST0000000000000086",
+      "codes": 1
+    }
+  },
+  {
+    "file": "promptpay-only.png",
+    "note": "A PromptPay payment QR, not a slip",
+    "expect": {
+      "ok": false,
+      "code": "PROMPTPAY_QR",
+      "codes": 1
+    }
+  },
+  {
+    "file": "no-qr.png",
+    "note": "Slip without a QR code",
+    "expect": {
+      "ok": false,
+      "code": "NO_QR_FOUND",
+      "codes": 0
+    }
+  },
+  {
+    "file": "photo-dim.jpg",
+    "note": "Blurred, dark, low contrast JPEG q55 (photo of a screen)",
+    "expect": {
+      "ok": true,
+      "kind": "bank",
+      "sendingBank": "011",
+      "transRef": "011260210104200777",
+      "codes": 1
+    }
+  }
+]
